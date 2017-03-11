@@ -8,7 +8,7 @@ class App extends Component {
     super(props);
     this.state =
       {
-        currentUser: "Anonymous", // optional. if currentUser is not defined, it means the user is Anonymous
+        currentUser: "Anonymous",
         messages: [],
         usersConnected: ""
       }
@@ -16,23 +16,28 @@ class App extends Component {
       this.handleDisplayMessages = this.handleDisplayMessages.bind(this)
     }
 
+    //Establishing connection to the Web Socket Server and getting messages
+    //back frm the server
+
     componentDidMount() {
       this.webSocket = new WebSocket("ws://0.0.0.0:3001");
       console.log("DID mount");
       this.webSocket.onmessage = this.handleWSMessage;
     }
 
+    //function to handle message that come from the server
+
     handleWSMessage = (event) => {
-      console.log("Event Data",event.data);
       var newMessage = JSON.parse(event.data);
       if(newMessage.type === 'onlineClients') {
         this.setState({usersConnected: newMessage.content})
       } else {
           var messages = [...this.state.messages, newMessage];
-          console.log("Messages",messages);
           this.setState({messages});
       }
     }
+
+    //Function to send notifications to the server
 
     handleNotifications = (newNotification) => {
       let msgNotification =
@@ -43,10 +48,10 @@ class App extends Component {
       this.webSocket.send(JSON.stringify(msgNotification))
     }
 
+    //function to sort between Message or Notification and act accordingly
 
     handleDisplayMessages(newMessage) {
       let newUser = newMessage.name;
-      console.log(`New User ${newUser} Current User ${this.state.currentUser}`);
       if (newUser !== this.state.currentUser ) {
         let newNotification = newUser;
         this.handleNotifications(newNotification)
@@ -55,7 +60,6 @@ class App extends Component {
       const message = newMessage;
       const messages = this.state.messages.concat(newMessage);
       this.webSocket.send(JSON.stringify(message));
-      console.log(message);
     }
 
   render() {

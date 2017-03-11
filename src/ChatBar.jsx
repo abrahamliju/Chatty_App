@@ -10,6 +10,7 @@ class ChatBar extends Component {
 
       }
   }
+// function to send messages to the main component
 
   handleMessage(event){
     if(event.which === 13){
