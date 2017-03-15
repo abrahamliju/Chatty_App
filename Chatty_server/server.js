@@ -37,6 +37,17 @@ const connectedUsers = (users) => {
          }
 }
 
+//Function to generate Random colors for the users
+
+function getRandomColor() {
+    var letters = '0123456789ABCDEF';
+    var color = '#';
+    for (var i = 0; i < 6; i++ ) {
+        color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+}
+
 wss.broadcast = function (data) {
   wss.clients.forEach(function each(client) {
     if (client.readyState) {
@@ -58,6 +69,7 @@ wss.on('connection', (ws) => {
   ws.on('message', function (message) {
     var msg = JSON.parse(message);
     msg.id = uuidV1();
+    msg.color = getRandomColor();
     if(msg.name === ""){
       msg.name = "Anonymous";
     }

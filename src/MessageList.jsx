@@ -17,7 +17,7 @@ class MessageList extends Component {
             }
             return (
               <div key={chatInfo.id}>
-                <p >{chatInfo.name}: {chatInfo.content}</p>
+                <p style={{color: chatInfo.color}}>{chatInfo.name}: {chatInfo.content}</p>
               </div>
             );
           })
