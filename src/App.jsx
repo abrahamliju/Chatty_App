@@ -21,7 +21,6 @@ class App extends Component {
 
     componentDidMount() {
       this.webSocket = new WebSocket("ws://0.0.0.0:3001");
-      console.log("DID mount");
       this.webSocket.onmessage = this.handleWSMessage;
     }
 
@@ -29,38 +28,48 @@ class App extends Component {
 
     handleWSMessage = (event) => {
       var newMessage = JSON.parse(event.data);
-      if(newMessage.type === 'onlineClients') {
-        this.setState({usersConnected: newMessage.content})
-      } else {
-          var messages = [...this.state.messages, newMessage];
-          this.setState({messages});
+
+      // if(newMessage.type === 'onlineClients') {
+      //   this.setState({usersConnected: newMessage.content})
+      // } else {
+      //     var messages = [...this.state.messages, newMessage];
+      //     this.setState({messages});
+      // }
+      switch (newMessage.type) {
+        case 'onlineClients':
+          // ....
+        case 'postMessage':
+        case 'postNotification':
+          // .....
+          break;
+        default:
+          break;
       }
     }
 
     //Function to send notifications to the server
 
     handleNotifications = (newNotification) => {
-      let msgNotification =
-          {
-            type: "postNotification",
-            content: `${this.state.currentUser} changed the name to ${newNotification}`
-          }
+      let msgNotification = {
+        type: 'postNotification',
+        content: `${this.state.currentUser} changed the name to ${newNotification}`
+      };
       this.webSocket.send(JSON.stringify(msgNotification))
     }
 
     //function to sort between Message or Notification and act accordingly
 
-    handleDisplayMessages(newMessage) {
-      let newUser = newMessage.name;
-      if (newUser !== this.state.currentUser ) {
-        let newNotification = newUser;
-        this.handleNotifications(newNotification)
-      }
-      this.setState({currentUser: newUser});
-      const message = newMessage;
-      const messages = this.state.messages.concat(newMessage);
-      this.webSocket.send(JSON.stringify(message));
+  handleDisplayMessages(newMessage) {
+    let newUser = newMessage.name;
+    if (newUser !== this.state.currentUser ) {
+      let newNotification = newUser;
+      this.handleNotifications(newNotification)
     }
+    this.setState({currentUser: newUser});
+    const message = newMessage;
+    const messages = this.state.messages.concat(newMessage);
+    this.webSocket.send(JSON.stringify(message));
+  }
 
   render() {
     console.log("Rendering <App/>")
@@ -76,9 +85,10 @@ class App extends Component {
 
         <MessageList messages={this.state.messages}/>
 
-        <ChatBar user={this.state.currentUser}
-                 displayUser={this.handleDisplayUser}
-                 displayMessage={this.handleDisplayMessages}
+        <ChatBar
+          user={this.state.currentUser}
+          displayUser={this.handleDisplayUser}
+          displayMessage={this.handleDisplayMessages}
         />
     </div>
     );

@@ -23,22 +23,22 @@ const wss = new SocketServer({ server });
 // Function to handle the number of Users connected to the server
 
 const connectedUsers = (users) => {
-  let message;
-  if(users === 1) {
-    message = `${users} user connected`;
-  }
-  if (users > 1) {
-    message = `${users} users connected`;
-  }
+  // let message;
+  // if(users === 1) {
+  //   message = `${users} user connected`;
+  // }
+  // if (users > 1) {
+  //   message = `${users} users connected`;
+  // }
+  const message = `${users} user${users.length > 1 ? 's' : ''} connected`;
 
   return {
-           type: "onlineClients",
-            content: message
-         }
+    type: "onlineClients",
+    content: message
+  };
 }
 
-//Function to generate Random colors for the users
-
+// Generates Random colors for the users
 function getRandomColor() {
     var letters = '0123456789ABCDEF';
     var color = '#';
@@ -63,24 +63,32 @@ wss.on('connection', (ws) => {
 
   noOfUsers += 1;
   console.log("No of Users Online ", noOfUsers);
-  wss.broadcast(
-                  JSON.stringify(connectedUsers(noOfUsers))
-               );
+  wss.broadcast(JSON.stringify(connectedUsers(noOfUsers)));
   ws.on('message', function (message) {
     var msg = JSON.parse(message);
     msg.id = uuidV1();
     msg.color = getRandomColor();
+
     if(msg.name === ""){
       msg.name = "Anonymous";
     }
-    if(msg.type === "postMessage"){
-      msg.type = "incomingMessage"
+
+    // if(msg.type === "postMessage"){
+    //   msg.type = "incomingMessage"
+    // }
+    // if(msg.type ==="postNotification"){
+    //   msg.type = "incomingNotification"
+    // }
+    switch (msg.type) {
+      case 'postMessage':
+        // ...
+      case 'postNotification':
+        // ...
+      default:
+        break;
     }
-    if(msg.type ==="postNotification"){
-      msg.type = "incomingNotification"
-    }
-    msgs = JSON.stringify(msg);
-    wss.broadcast(msgs)
+
+    wss.broadcast(JSON.stringify(msg));
 
     console.log('received: %s', msgs);
   });
@@ -90,9 +98,7 @@ wss.on('connection', (ws) => {
   // Set up a callback for when a client closes the socket. This usually means they closed their browser.
   ws.on('close', () => {
       noOfUsers -= 1;
-      wss.broadcast(
-                      JSON.stringify ( connectedUsers(noOfUsers) )
-                   )
+      wss.broadcast(JSON.stringify(connectedUsers(noOfUsers)))
 
       console.log("Users Online", noOfUsers);
       console.log('Client disconnected');
